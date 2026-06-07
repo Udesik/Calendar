@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1c4b69d6954818cb0036da9877a866, type: 3}
+  m_Name: ColorForDay
+  m_EditorClassIdentifier: 
+  _holidayColor: {r: 0.77254903, g: 0.5137255, b: 0.5647059, a: 1}
+  _basicColor: {r: 0.13292098, g: 0.2735849, b: 0.18407151, a: 1}
+  _eventColor: {r: 0.7589343, g: 0.5137255, b: 0.77254903, a: 1}
+  _invisibleColor: {r: 0, g: 0, b: 0, a: 0}
+  _nowColor: {r: 0.43137255, g: 0.6039216, b: 0.45882353, a: 1}
