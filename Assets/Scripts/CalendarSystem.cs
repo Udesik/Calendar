@@ -21,7 +21,7 @@ public class CalendarSystem : MonoBehaviour
         if (holidaysInThisYear > 0)
         {
             Debug.Log("[CalendarSystem] Кэш успешно найден на диске. Мгновенно строим календарь!");
-            // Если данные были на диске, принудительно строим календарь СЕЙЧАС
+            
             if (_calendarGenerater != null)
             {
                 _calendarGenerater.BuildCalendar(_year, _month);
@@ -29,37 +29,28 @@ public class CalendarSystem : MonoBehaviour
         }
     }
 
-    // Этот метод автоматически выполнится САМ, как только интернет-запрос завершится и расшифруется
-    // Этот метод сработает ТОЛЬКО если мы качали данные из интернета
     private void OnHolidaysDownloaded(Dictionary<DateTime, string> downloadedData)
     {
         foreach (KeyValuePair<DateTime, string> pair in downloadedData)
         {
-            // Используем квадратные скобки: 
-            // Если такой даты еще не было — она добавится.
-            // Если дата уже существовала — она обновится.
             _yearHolidays[pair.Key] = pair.Value;
             Debug.Log($"[CalendarSystem] Добавлен новый праздник: {pair.Key.ToString("dd.MM.yyyy")}, {pair.Value}");
         }
 
-        // 3. ЗАШИФРОВЫВАЕМ и сохраняем скачанный словарь в файл на будущее
         HolidayCacheStorage.SaveHolidays(_yearHolidays);
 
         CalendarGenerater generator = FindObjectOfType<CalendarGenerater>();
+        
         if (generator != null)
         {
-            // Передаем текущие год и месяц из генератора, чтобы он нарисовал свежие данные
             generator.BuildCalendar(generator._year, generator._month);
         }
     }
 
-    // Если пользователь вручную добавил свой праздник — просто пересохраните словарь:
     public void AddCustomHoliday(DateTime date, string name)
     {
         _yearHolidays[date.Date] = name;
         HolidayCacheStorage.SaveHolidays(_yearHolidays);
-    
-        // Берем год и месяц, которые пользователь видит на экране прямо сейчас!
         _calendarGenerater.BuildCalendar(_calendarGenerater._year, _calendarGenerater._month);
     }
 
@@ -67,15 +58,13 @@ public class CalendarSystem : MonoBehaviour
     {
         _yearEvents[date.Date] = tasks;
         EventCacheStorage.SaveTasks(_yearEvents);
-    
-        // Перерисовываем именно тот месяц, на котором находится пользователь
         _calendarGenerater.BuildCalendar(_calendarGenerater._year, _calendarGenerater._month);
     }
 
     public void DeleteHoliday(DateTime date)
     {
         _yearHolidays.Remove(date.Date);
-        HolidayCacheStorage.SaveHolidays(_yearHolidays); // Перезапишет файл
+        HolidayCacheStorage.SaveHolidays(_yearHolidays);
         _calendarGenerater.BuildCalendar(_year, _month);
     }
 
@@ -90,7 +79,7 @@ public class CalendarSystem : MonoBehaviour
             _yearEvents[date.Date] = events;
         }
 
-        EventCacheStorage.SaveTasks(_yearEvents); // Перезапишет файл
+        EventCacheStorage.SaveTasks(_yearEvents);
         _calendarGenerater.BuildCalendar(_year, _month);
     }
 
@@ -106,7 +95,6 @@ public class CalendarSystem : MonoBehaviour
 
     public void Init(int year)
     {
-        // 1. Пытаемся загрузить всё, что есть на диске (если словарь еще не был загружен при старте)
         if (_yearHolidays == null || _yearHolidays.Count == 0)
         {
             _yearHolidays = HolidayCacheStorage.LoadHolidays();
@@ -117,7 +105,6 @@ public class CalendarSystem : MonoBehaviour
             _yearEvents = EventCacheStorage.LoadTasks();
         }
 
-        // 2. ИСПРАВЛЕНИЕ: Проверяем, есть ли элементы КОНКРЕТНО ДЛЯ ЭТОГО ГОДА
         int holidaysInThisYear = _yearHolidays.Keys.Count(date => date.Year == year);
 
         if (holidaysInThisYear == 0)
