@@ -10,14 +10,8 @@ public class CalendarGenerater : MonoBehaviour
     [SerializeField] private CalendarSystem _calendarCache;
     [SerializeField] private TMP_Text _dateText;
     
-    // Делаем переменные публичными, чтобы CalendarSystem мог их читать
     public int _month = DateTime.Now.Month;
     public int _year = DateTime.Now.Year;
-
-    private void Start()
-    {
-        //ChackStorageHolidays();
-    }
 
     public void BuildCalendar(int year, int month)
     {
@@ -44,18 +38,18 @@ public class CalendarGenerater : MonoBehaviour
 
             if (savedEvents != null && savedEvents.TryGetValue(day, out List<Event> tasks))
             {
-                currentTasks = tasks; // Запоминаем список задач, если нашли
+                currentTasks = tasks;
             }
 
             if (savedHolidays != null && savedHolidays.TryGetValue(day, out string name))
             {  
                 isHoliday = true;
-                holidayName = name; // Официальный государственный праздник
+                holidayName = name;
             }
             else if (day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday)
             {
                 isHoliday = true;
-                holidayName = "Обычный выходной"; // Календарный выходной
+                holidayName = "Обычный выходной";
             }
 
             _dayPrefabs[cellIndex].Init(new Day(day, currentTasks, isHoliday, holidayName));
@@ -72,18 +66,12 @@ public class CalendarGenerater : MonoBehaviour
     {
         Dictionary<DateTime, string> savedHolidays = _calendarCache.GetHolidays();
 
-        // Проверяем, есть ли хоть одна дата за этот год в словаре
         if (savedHolidays == null || savedHolidays.Keys.Count(date => date.Year == _year) == 0)
         {
-            // Если года нет — запускаем инициализацию и скачивание в CalendarSystem
             _calendarCache.Init(_year);
-            
-            // ВАЖНО: Мы НЕ вызываем здесь BuildCalendar. Сетка нарисуется сама,
-            // когда интернет вернет ответ в метод OnHolidaysDownloaded.
         }
         else
         {
-            // Если год уже есть в памяти — мгновенно рисуем его
             BuildCalendar(_year, _month);
         }
     }
@@ -97,8 +85,7 @@ public class CalendarGenerater : MonoBehaviour
             _month = 1;
             _year++;
         }
-
-        // ИСПРАВЛЕНИЕ: Вместо голого BuildCalendar вызываем проверку хранилища!
+        
         ChackStorageHolidays();
     }
 
@@ -112,7 +99,6 @@ public class CalendarGenerater : MonoBehaviour
             _year--;
         }
 
-        // ИСПРАВЛЕНИЕ: Вместо голого BuildCalendar вызываем проверку хранилища!
         ChackStorageHolidays();
     }
 }
