@@ -19,33 +19,23 @@ public static class HolidayLoader
     {
         public RawHolidayItem[] items;
     }
-
-    /// <summary>
-    /// Корутина для скачивания и расшифровки праздников за конкретный год.
-    /// </summary>
-    /// <param name="year">Год, который нужно скачать (например, 2026)</param>
-    /// <param name="countryCode">Код страны (например, "RU", "BY", "KZ")</param>
-    /// <param name="onSuccess">Действие, которое выполнится после успешной расшифровки. Передаст готовый словарь.</param>
+    
     public static IEnumerator FetchYearHolidays(int year, string countryCode, Action<Dictionary<DateTime, string>> onSuccess)
     {
         string url = $"https://date.nager.at/api/v3/PublicHolidays/{year}/{countryCode}";
 
-        // ПРАВИЛЬНОЕ СОЗДАНИЕ ЗАПРОСА: Создаем объекты явно без оператора using
         UnityWebRequest webRequest = UnityWebRequest.Get(url);
         BypassCertificate certificateHandler = new BypassCertificate();
         
         // Связываем их вместе, чтобы Windows пропустила защищенное соединение
         webRequest.certificateHandler = certificateHandler;
 
-        // Отправляем запрос в сеть
         yield return webRequest.SendWebRequest();
 
-        // Проверка на успешность запроса
         if (webRequest.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Failed connection to holiday server: " + webRequest.error);
             
-            // ВАЖНО: При ошибке обязательно очищаем память перед выходом!
             certificateHandler.Dispose();
             webRequest.Dispose();
             yield break;
@@ -55,7 +45,6 @@ public static class HolidayLoader
         string wrappedJson = "{ \"items\": " + jsonResponse + "}";
         JsonWrapper wrapper;
 
-        // Расшифровываем JSON
         try
         {
             wrapper = JsonUtility.FromJson<JsonWrapper>(wrappedJson);
@@ -75,10 +64,8 @@ public static class HolidayLoader
         {
             foreach (var rawItem in wrapper.items)
             {
-                // Превращаем строку "2026-01-01" в настоящий DateTime объект
                 if (DateTime.TryParse(rawItem.date, out DateTime parsedDate))
                 {
-                    // Сохраняем в словарь: Ключ = Дата, Значение = Название праздника
                     holidayResult[parsedDate.Date] = rawItem.localName;
                 }
             }
@@ -87,18 +74,15 @@ public static class HolidayLoader
         Debug.Log($"[HolidayLoader] Успешно скачано и расшифровано праздников для {countryCode} на {year} год: {holidayResult.Count} шт.");
         onSuccess?.Invoke(holidayResult);
 
-        // ФИНАЛЬНАЯ ОЧИСТКА: Вручную закрываем соединение и освобождаем ресурсы
         certificateHandler.Dispose();
         webRequest.Dispose();
     }
 }
 
-// Вспомогательный класс-обходчик. Находится строго за пределами HolidayLoader
 public class BypassCertificate : CertificateHandler
 {
     protected override bool ValidateCertificate(byte[] certificateData)
     {
-        // Разрешаем любые SSL-сертификаты. Запрос выполнится и на Linux, и на Windows-сборке!
         return true; 
     }
 }
