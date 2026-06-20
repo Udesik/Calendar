@@ -15,7 +15,7 @@ public class ViewInformationSystem : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _dateText;
 
     [Header("Настройки Списков и Пулинга")]
-    [SerializeField] private GameObject _eventPrefab;     // Префаб одной задачи (с компонентом EventPrefab)
+    [SerializeField] private GameObject _eventPrefab;
     [SerializeField] private Transform _eventContainer;
     [SerializeField] private List<DayPrefab> _days;
 
